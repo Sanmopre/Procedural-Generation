@@ -11,6 +11,7 @@ public class PerlinNoiseGenerator : MonoBehaviour
     public int gridSize;
     public float scale;
     public int sizeOfGrid;
+    public float amplitudMultiplier;
 
     public Vector3[] vertices;
     public int[] triangles;
@@ -33,7 +34,7 @@ public class PerlinNoiseGenerator : MonoBehaviour
                 //SETTING VERTEX
                 float sampleX = k / scale;
                 float sampleY = i / scale;
-                vertices[i + (k*gridSize)] = new Vector3(sizeOfGrid * i, Mathf.PerlinNoise(sampleX, sampleY), sizeOfGrid * k);
+                vertices[i + (k*gridSize)] = new Vector3(sizeOfGrid * i, Mathf.PerlinNoise(sampleX, sampleY) * amplitudMultiplier, sizeOfGrid * k);
             }
         }
 
