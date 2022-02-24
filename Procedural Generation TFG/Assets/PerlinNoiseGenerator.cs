@@ -17,20 +17,19 @@ public class PerlinNoiseGenerator : MonoBehaviour
     public int octaves;
     public float persistance;
     public float lacunarity;
-
     private Vector3[] vertices;
     private int[] triangles;
 
+    public Vector2 position;
     public void CalcNoise()
     {
-
         //PSEUDO RANDOM NUMBER GENERATOR BASED ON SEED
         System.Random prng = new System.Random(seed);
         Vector2[] octaveOffsets = new Vector2[octaves];
         for (int i = 0; i < octaves; i++) 
         {
-            float offsetX = prng.Next(-100000, 100000);
-            float offsetY = prng.Next(-100000, 100000);
+            float offsetX = prng.Next(-100000, 100000) + position.x;
+            float offsetY = prng.Next(-100000, 100000) - position.y;
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
 
@@ -53,9 +52,8 @@ public class PerlinNoiseGenerator : MonoBehaviour
                 //SETTING VERTEX POSITIONS
                 for (int p = 0; p < octaves; p++)
                 {
-                    float sampleX = k / scale * frequency + octaveOffsets[p].x;
-                    float sampleY = i / scale * frequency + octaveOffsets[p].y;
-
+                    float sampleX = (k + octaveOffsets[p].x) / scale * frequency;
+                    float sampleY = (i + octaveOffsets[p].y) / scale * frequency;
                     //*2 - 1 so we can get also negative values
                     float perlinValue = Mathf.PerlinNoise(sampleX,sampleY) * 2 - 1;
 
