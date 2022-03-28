@@ -31,7 +31,7 @@ public class MeshGenerator : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void Start()
     {
         generator.CalcNoise();
         CreateMeshData();
@@ -45,16 +45,12 @@ public class MeshGenerator : MonoBehaviour
         triangles = generator.GetTriangles();
     }
 
-    void CreateMesh() 
+    public void UpdateMap() 
     {
-        mesh.Clear();
-        for (int i = 0; i < vertices.Length; i++) 
-        {
-            vertices[i].y *= meshAmplitudMultiplier; 
-        }
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
+        generator.CalcNoise();
+        CreateMeshData();
+        textGen.DrawNoiseMap(vertices, (int)Mathf.Sqrt(vertices.Length));
+        CreateMaps();
     }
 
     void CreateMaps() 
@@ -63,7 +59,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int k = 0; k < sizeOfMap; k++)
             {
-                generator.position = new Vector2(-i * generator.gridSize, -k * generator.gridSize);
+                generator.position = new Vector2(-i * (generator.gridSize - 1), -k * (generator.gridSize - 1));
                 generator.CalcNoise();
                 CreateMeshData();
 
