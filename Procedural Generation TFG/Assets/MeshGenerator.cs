@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MapInformation;
 
 public class MeshGenerator : MonoBehaviour
 {
@@ -13,14 +14,15 @@ public class MeshGenerator : MonoBehaviour
 
     GameObject[] meshArray;
 
-    Mesh mesh;
-    int[] triangles;
-    Vector3[] vertices;
-
     private void Awake()
     {        
+        //Noise generator
         generator = GetComponent<PerlinNoiseGenerator>();
-        textGen = GetComponent<NoiseTextureGenerator>();         
+
+        //Noise texture generator
+        textGen = GetComponent<NoiseTextureGenerator>();
+        
+        //Different meshes calculations
         meshArray = new GameObject[sizeOfMap * sizeOfMap];
         for (int i = 0; i < sizeOfMap; i++)
         {
@@ -29,51 +31,40 @@ public class MeshGenerator : MonoBehaviour
                 meshArray[i*sizeOfMap + k] = Instantiate(meshObject, new Vector3(k * (generator.gridSize - 1), 0, -i * (generator.gridSize - 1)), Quaternion.identity);
             }
         }
+
     }
 
     private void Start()
     {
-        generator.CalcNoise();
-        CreateMeshData();
-        textGen.DrawNoiseMap(vertices, (int)Mathf.Sqrt(vertices.Length));
-        CreateMaps();
-    }
-
-    void CreateMeshData() 
-    {
-        vertices = generator.GetVertices();
-        triangles = generator.GetTriangles();
+        //First Generation of the map
+        UpdateMap();
     }
 
     public void UpdateMap() 
     {
-        generator.CalcNoise();
-        CreateMeshData();
-        textGen.DrawNoiseMap(vertices, (int)Mathf.Sqrt(vertices.Length));
+        textGen.DrawNoiseMap(generator.VoronoiNoise().vertices, (int)Mathf.Sqrt(generator.VoronoiNoise().vertices.Length));
         CreateMaps();
     }
 
     void CreateMaps() 
     {
+        //Loop through the different meshes
         for (int i = 0; i < sizeOfMap; i++)
         {
             for (int k = 0; k < sizeOfMap; k++)
             {
+                //Generate the Noise Values
                 generator.position = new Vector2(-i * (generator.gridSize - 1), -k * (generator.gridSize - 1));
-                generator.CalcNoise();
-                CreateMeshData();
-
-                vertices = generator.GetVertices();
-                triangles = generator.GetTriangles();
+                MapInfo mapnInfo = generator.VoronoiNoise();
 
                 Mesh pogMesh = meshArray[i * sizeOfMap + k].GetComponent<MeshFilter>().mesh;
                 pogMesh.Clear();
-                for (int s = 0; s < vertices.Length; s++)
+                for (int s = 0; s < mapnInfo.vertices.Length; s++)
                 {
-                    vertices[s].y *= meshAmplitudMultiplier;
+                    mapnInfo.vertices[s].y *= meshAmplitudMultiplier;
                 }
-                pogMesh.vertices = vertices;
-                pogMesh.triangles = triangles;
+                pogMesh.vertices = mapnInfo.vertices;
+                pogMesh.triangles = mapnInfo.triangles;
                 pogMesh.RecalculateNormals();
             }
         }
