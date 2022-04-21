@@ -5,9 +5,18 @@ using MapInformation;
 // Try varying the xOrg, yOrg and scale values in the inspector
 // while in Play mode to see the effect they have on the noise.
 
+    enum NoiseType 
+    {
+    PERLIN,
+    VORONOI,
+    VORONOI_SECOND_POINT,
+    VORONOI_SECOND_MINUS_FIRST_POINT,
+    VORONOI_ONE_MINUS_FIRST,
+    VORONOI_FIRST_DOT_SECOND
+};
+
 public class PerlinNoiseGenerator : MonoBehaviour
 {
-
     public int gridSize;
 
     public int vertexDistance;
@@ -121,7 +130,7 @@ public class PerlinNoiseGenerator : MonoBehaviour
     }
 
 
-    public MapInfo CalcNewNoise() 
+    public MapInfo LeveledPerlinNoise() 
     {
         MapInfo mapInfo;
         mapInfo.vertices = new Vector3[gridSize * gridSize];
@@ -130,27 +139,32 @@ public class PerlinNoiseGenerator : MonoBehaviour
         for (int i = 0; i < gridSize; i++)
         {
             for (int k = 0; k < gridSize; k++)
-            { 
-                float perlinValue = Mathf.PerlinNoise((float)(i + position.x) /40.0f , (float)(k - position.y) /40.0f);
-                /*
-                if(perlinValue <= 0.7f && perlinValue >= 0.5f) 
+            {
+                float perlinValue1 = Mathf.PerlinNoise((float)(i + position.x) / scale, (float)(k - position.y) / scale);
+
+                float perlinValue = Mathf.Floor(perlinValue1 * 10.0f);//Mathf.Clamp(perlinValue1,0.3f,0.7f);//Mathf.Floor(perlinValue1 * 10.0f);
+
+                if (perlinValue > maxNoiseHeight)
                 {
-                    perlinValue = 0.5f;
-                }else if(perlinValue <= 0.5f) 
-                {
-                    perlinValue = 0.2f;
+                    maxNoiseHeight = perlinValue;
                 }
-                else
+                else if (perlinValue < minNoiseHeight)
                 {
-                    perlinValue = 0.8f;
+                    minNoiseHeight = perlinValue;
                 }
-                */
+
                 mapInfo.vertices[i + (k * gridSize)] = new Vector3(i, perlinValue, k);
 
 
             }
         }
 
+        //NORMALIZE VECTOR OF VERTICES
+        for (int r = 0; r < mapInfo.vertices.Length; r++)
+        {
+            float newValue = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, mapInfo.vertices[r].y);
+            mapInfo.vertices[r] = new Vector3(mapInfo.vertices[r].x, newValue, mapInfo.vertices[r].z);
+        }
 
         for (int i = 0; i < gridSize - 1; i++)
         {
@@ -198,6 +212,7 @@ public class PerlinNoiseGenerator : MonoBehaviour
             for (int k = 0; k < gridSize - 1; k++)
             {
                 float distanceValue = float.MaxValue;
+                float secondDistance = float.MaxValue;
                 for (int s = 0; s < numberOfPoints * numberOfPoints; s++) 
                 {
                     float newDistance = Vector2.Distance(points[s], new Vector2(i, k));
@@ -206,19 +221,31 @@ public class PerlinNoiseGenerator : MonoBehaviour
                     {
                         distanceValue = newDistance;
                     }
- 
                 }
 
-                if (distanceValue > maxNoiseHeight)
+
+                for (int s = 0; s < numberOfPoints * numberOfPoints; s++)
                 {
-                    maxNoiseHeight = distanceValue;
-                }
-                else if (distanceValue < minNoiseHeight)
-                {
-                    minNoiseHeight = distanceValue;
+                    float newDistance = Vector2.Distance(points[s], new Vector2(i, k));
+
+                    if (newDistance < secondDistance && newDistance > distanceValue)
+                    {
+                        secondDistance = newDistance;
+                    }
                 }
 
-                mapInfo.vertices[i + (k * gridSize)] = new Vector3(i, distanceValue, k);
+                float pogValue = Mathf.Abs( secondDistance * distanceValue);
+
+                if (pogValue > maxNoiseHeight)
+                {
+                    maxNoiseHeight = pogValue;
+                }
+                else if (pogValue < minNoiseHeight)
+                {
+                    minNoiseHeight = pogValue;
+                }
+
+                mapInfo.vertices[i + (k * gridSize)] = new Vector3(i, pogValue, k);
             }
         }
 
@@ -247,6 +274,44 @@ public class PerlinNoiseGenerator : MonoBehaviour
                 mapInfo.triangles[index + 5] = (i * gridSize + k + 1);
             }
         }
+        return mapInfo;
+    }
+
+
+    public MapInfo MixVoronoiAndPerlin() 
+    {
+        MapInfo mapInfo;
+
+        mapInfo.vertices = new Vector3[gridSize * gridSize];
+        mapInfo.triangles = new int[(gridSize - 1) * (gridSize - 1) * 6];
+
+        MapInfo Perlin = CalcImprovedPerlinNoise();
+        MapInfo Voronoi = VoronoiNoise();
+
+        for (int r = 0; r < mapInfo.vertices.Length; r++)
+        {
+            float newY = (Perlin.vertices[r].y * Voronoi.vertices[r].y);
+            mapInfo.vertices[r] = new Vector3(mapInfo.vertices[r].x,newY, mapInfo.vertices[r].z);
+        }
+
+        for (int i = 0; i < gridSize - 1; i++)
+        {
+            for (int k = 0; k < gridSize - 1; k++)
+            {
+                //SETTING TRIANGLES INDEX
+                int fixedGridSize = gridSize - 1;
+                int index = (i * fixedGridSize + k) * 6;
+
+                mapInfo.triangles[index] = (i * gridSize + k);
+                mapInfo.triangles[index + 1] = ((i + 1) * gridSize + k);
+                mapInfo.triangles[index + 2] = ((i + 1) * gridSize + k + 1);
+
+                mapInfo.triangles[index + 3] = (i * gridSize + k);
+                mapInfo.triangles[index + 4] = ((i + 1) * gridSize + k + 1);
+                mapInfo.triangles[index + 5] = (i * gridSize + k + 1);
+            }
+        }
+
         return mapInfo;
     }
 

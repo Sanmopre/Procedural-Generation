@@ -453,7 +453,6 @@ GameObject:
   m_Component:
   - component: {fileID: 105468867}
   - component: {fileID: 105468866}
-  - component: {fileID: 105468865}
   m_Layer: 0
   m_Name: Canvas Camera
   m_TagString: Untagged
@@ -461,14 +460,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &105468865
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 105468864}
-  m_Enabled: 1
 --- !u!20 &105468866
 Camera:
   m_ObjectHideFlags: 0
@@ -2083,6 +2074,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2e03e19be8931b4a934c9b37bd70b63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointToLook: {x: 100, y: 0, z: 100}
 --- !u!1 &973567838
 GameObject:
   m_ObjectHideFlags: 0
@@ -2241,7 +2233,7 @@ MonoBehaviour:
   persistance: 0.2
   lacunarity: 2
   position: {x: 0, y: 0}
-  numberOfPoints: 15
+  numberOfPoints: 4
 --- !u!114 &1037433226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2793,7 +2785,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1197679402}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -484.3, y: -184.5, z: -111}
+  m_LocalPosition: {x: -434, y: -205, z: -111}
   m_LocalScale: {x: 12.579999, y: 12.579999, z: 12.579999}
   m_Children: []
   m_Father: {fileID: 253352522}

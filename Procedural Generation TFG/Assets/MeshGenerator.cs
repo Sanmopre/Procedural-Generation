@@ -42,7 +42,7 @@ public class MeshGenerator : MonoBehaviour
 
     public void UpdateMap() 
     {
-        textGen.DrawNoiseMap(generator.VoronoiNoise().vertices, (int)Mathf.Sqrt(generator.VoronoiNoise().vertices.Length));
+        textGen.DrawNoiseMap(generator.LeveledPerlinNoise().vertices, (int)Mathf.Sqrt(generator.LeveledPerlinNoise().vertices.Length));
         CreateMaps();
     }
 
@@ -55,7 +55,7 @@ public class MeshGenerator : MonoBehaviour
             {
                 //Generate the Noise Values
                 generator.position = new Vector2(-i * (generator.gridSize - 1), -k * (generator.gridSize - 1));
-                MapInfo mapnInfo = generator.VoronoiNoise();
+                MapInfo mapnInfo = generator.LeveledPerlinNoise();
 
                 Mesh pogMesh = meshArray[i * sizeOfMap + k].GetComponent<MeshFilter>().mesh;
                 pogMesh.Clear();

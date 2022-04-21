@@ -21,6 +21,6 @@ public class NoiseTextureGenerator : MonoBehaviour
         texture.Apply();
 
         textureRenderer.sharedMaterial.mainTexture = texture;
-        textureRenderer.transform.localScale = new Vector3(20, 20, 20);
+        textureRenderer.transform.localScale = new Vector3(35, 20, 35);
     }
 }
