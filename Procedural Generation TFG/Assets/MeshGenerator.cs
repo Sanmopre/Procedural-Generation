@@ -9,6 +9,7 @@ public class MeshGenerator : MonoBehaviour
     private PerlinNoiseGenerator generator;
     private NoiseTextureGenerator textGen;
     public float meshAmplitudMultiplier;
+    public int noiseMode;
 
     public int sizeOfMap;
 
@@ -42,11 +43,37 @@ public class MeshGenerator : MonoBehaviour
 
     public void UpdateMap() 
     {
-        textGen.DrawNoiseMap(generator.LeveledPerlinNoise().vertices, (int)Mathf.Sqrt(generator.LeveledPerlinNoise().vertices.Length));
-        CreateMaps();
+        MapInfo map;
+        switch (noiseMode) 
+        {
+            case 0:
+                map = generator.CalcImprovedPerlinNoise();
+                break;
+            case 1:
+                map = generator.LeveledPerlinNoise();
+                break;
+            case 2:
+                map = generator.VoronoiNoise(false);
+                break;
+            case 3:
+                map = generator.VoronoiNoise(true);
+                break;
+            case 4:
+                map = generator.MixVoronoiAndPerlin();
+                break;
+            default:
+                map = generator.CalcImprovedPerlinNoise();
+                break;
+
+        }
+
+
+
+        textGen.DrawNoiseMap(map.vertices, (int)Mathf.Sqrt(map.vertices.Length));
+        CreateMaps(map);
     }
 
-    void CreateMaps() 
+    void CreateMaps(MapInfo mapnInfo) 
     {
         //Loop through the different meshes
         for (int i = 0; i < sizeOfMap; i++)
@@ -55,8 +82,7 @@ public class MeshGenerator : MonoBehaviour
             {
                 //Generate the Noise Values
                 generator.position = new Vector2(-i * (generator.gridSize - 1), -k * (generator.gridSize - 1));
-                MapInfo mapnInfo = generator.LeveledPerlinNoise();
-
+                
                 Mesh pogMesh = meshArray[i * sizeOfMap + k].GetComponent<MeshFilter>().mesh;
                 pogMesh.Clear();
                 for (int s = 0; s < mapnInfo.vertices.Length; s++)
